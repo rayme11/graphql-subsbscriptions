@@ -34,9 +34,9 @@ module.exports = gql`
     day: String
     format: String
     track: String
-    @deprecated(
-      reason: "Too many sessions do not fit into a single track, we will be migrating to a tags based system in the future..."
-    )
+      @deprecated(
+        reason: "Too many sessions do not fit into a single track, we will be migrating to a tags based system in the future..."
+      )
     level: String
     favoriteCount: Int
     speakers: [Speaker]
@@ -89,5 +89,14 @@ module.exports = gql`
     userInfo: AuthPayload
     signOut: AuthPayload
     markFeatured(speakerId: ID!, featured: Boolean!): Speaker
+  }
+
+  type Subscription {
+    favorites: FavoriteCount
+  }
+
+  type FavoriteCount {
+    sessionId: ID
+    count: Int
   }
 `;

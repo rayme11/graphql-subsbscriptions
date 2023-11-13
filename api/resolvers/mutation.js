@@ -1,5 +1,5 @@
-const authUtils = require("../utils/auth");
-
+const authUtils = require('../utils/auth');
+const FAVORITEUPDATES = 'FAVORITEUPDATES';
 module.exports = {
   createSession: async (parent, args, { dataSources, user }, info) => {
     if (!user) {
@@ -20,16 +20,16 @@ module.exports = {
     );
 
     if (existingUser) {
-      throw new Error("A user account with that email already exists.");
+      throw new Error('A user account with that email already exists.');
     }
 
     const hash = authUtils.hashPassword(userCredentials.password);
 
     const role = userCredentials.email
       .toLowerCase()
-      .endsWith("@globomantics.com")
-      ? "ADMIN"
-      : "USER";
+      .endsWith('@globomantics.com')
+      ? 'ADMIN'
+      : 'USER';
 
     const dbUser = dataSources.userDataSource.createUser({
       email: userCredentials.email,
@@ -37,13 +37,13 @@ module.exports = {
       role,
     });
 
-    if (role === "USER") {
+    if (role === 'USER') {
       dataSources.speakerDataSource.createSpeaker(dbUser);
     }
 
     const token = authUtils.createToken(dbUser);
 
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
     });
 
@@ -63,7 +63,7 @@ module.exports = {
     );
 
     if (!existingUser) {
-      throw new Error("Incorrect email address or password.");
+      throw new Error('Incorrect email address or password.');
     }
 
     const isValidPassword = authUtils.verifyPassword(
@@ -72,12 +72,12 @@ module.exports = {
     );
 
     if (!isValidPassword) {
-      throw new Error("Incorrect email address or password.");
+      throw new Error('Incorrect email address or password.');
     }
 
     const token = authUtils.createToken(existingUser);
 
-    res.cookie("token", token, {
+    res.cookie('token', token, {
       httpOnly: true,
     });
 
@@ -101,7 +101,7 @@ module.exports = {
     };
   },
   signOut: async (parent, args, { dataSources, res }, info) => {
-    res.clearCookie("token");
+    res.clearCookie('token');
     return {
       user: undefined,
     };
@@ -112,12 +112,21 @@ module.exports = {
         args.sessionId,
         context.user.sub
       );
+      let users = await context.dataSources.userDataSource.getFavorites(
+        args.sessionId
+      );
+      context.pubsub.publish(FAVORITEUPDATES, {
+        favorites: {
+          sessionId: args.sessionId,
+          count: users.length,
+        },
+      });
       return user;
     }
     return undefined;
   },
   markFeatured: (parent, args, { user, dataSources }, info) => {
-    if (user && user.role === "ADMIN") {
+    if (user && user.role === 'ADMIN') {
       return dataSources.speakerDataSource.markFeatured(
         args.speakerId,
         args.featured
