@@ -4,6 +4,7 @@ import { Media } from "./pages/media/Media";
 import { OurStory } from "./pages/our-story/OurStory";
 import { Robotics } from "./pages/robotics/Robotics";
 import { Conference } from "./pages/conference/Conference";
+import { FavoriteCount } from './pages/conference/FavoriteCount';
 import { Auth } from "./pages/auth/Auth";
 import Admin from "./pages/admin/Admin";
 
@@ -24,6 +25,9 @@ function AppRouter() {
           <p>Reticulating splines...</p>
         ) : (
           <Switch>
+            <Route path="/favorites">
+              <FavoriteCount />
+            </Route>
             <Route path="/media">
               <Media />
             </Route>

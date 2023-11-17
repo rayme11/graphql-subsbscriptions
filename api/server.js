@@ -51,6 +51,17 @@ const server = new ApolloServer({
   typeDefs: [createRateLimitTypeDef(), typeDefs],
   resolvers,
   dataSources,
+  subscriptions: {
+    onDisconnect: () => {
+      console.log('Disconnecting');
+    },
+    onConnect: (params, WebSocket) => {
+      const cookie = WebSocket.upgradeReq.headers.cookie.split('token=')[1];
+      const user = auth.verifyToken(cookie);
+      console.log('Connected: ', user);
+      return { user };
+    },
+  },
   schemaDirectives: {
     requiresAdmin: AuthDirective,
     rateLimit: createRateLimitDirective({
@@ -65,8 +76,12 @@ const server = new ApolloServer({
       },
     }),
   ],
-  context: ({ req, res }) => {
+  context: ({ req, res, connection }) => {
     let user = null;
+
+    if (connection && connection.context) {
+      user = connection.context.user;
+    }
     if (req && req.cookies.token) {
       const payload = auth.verifyToken(req.cookies.token);
       user = payload;

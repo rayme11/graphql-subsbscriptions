@@ -71,6 +71,16 @@ const TOGGLE_FAVORITE = gql`
   }
 `;
 
+const FAVORITES = gql`
+  subscription favorites($sessionId: ID){
+    favorites(sessionId: $sessionId){
+      sessionId
+      count
+    }
+  }
+`;
+
+
 function SessionItem({ session }) {
   const { isAuthenticated } = React.useContext(AuthContext);
   const [toggle] = useMutation(TOGGLE_FAVORITE, {
@@ -138,11 +148,29 @@ function SessionItem({ session }) {
 }
 
 const SessionList = () => {
-  const { loading, error, data } = useQuery(SESSIONS);
+  const { loading, error, data, subscribeToMore } = useQuery(SESSIONS);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
+  subscribeToMore({
+    document: FAVORITES,
+    variables: {
+      sessionId: data.sessions[1].id
+    },
+    updateQuery: (prev, {subscriptionData})=>{
+      if(!subscriptionData.data) return prev;
+      let newData = Object.assign({}, prev);
+      newData.sessions = prev.sessions.map((oldSession)=>{
+        const s = Object.assign({}, oldSession);
+        if(s.id == subscriptionData.data.favorites.sessionId){
+          s.favoriteCount = subscriptionData.data.favorites.count;
+        }
+        return s;
+      });
+      return newData;
+    }
+  });
   return data.sessions.map((session) => (
     <SessionItem
       key={session.id}

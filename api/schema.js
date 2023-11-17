@@ -92,7 +92,7 @@ module.exports = gql`
   }
 
   type Subscription {
-    favorites: FavoriteCount
+    favorites(sessionId: ID): FavoriteCount
   }
 
   type FavoriteCount {

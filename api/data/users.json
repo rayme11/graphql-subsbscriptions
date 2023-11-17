@@ -26,6 +26,16 @@
         "80310",
         "79874"
       ]
+    },
+    {
+      "email": "test@gmail.com",
+      "hash": "$2a$10$GPJoMhJanaizpMt5KyapIOCmj4M1OU9ptO0xt6P2l7AW9skJDY.XK",
+      "role": "USER",
+      "id": "86b14a8d-34a6-41dd-9ac3-338f07289b17",
+      "favorites": [
+        "84473",
+        "84375"
+      ]
     }
   ]
 }
